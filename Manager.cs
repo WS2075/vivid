@@ -1,4 +1,4 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -6,7 +6,7 @@ using UnityEngine.InputSystem;
 
 public class Manager : MonoBehaviour
 {
-    //‰¼
+    //ä»®
     [SerializeField]
     private GameObject item;
 
