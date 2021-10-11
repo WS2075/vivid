@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class enemy : MonoBehaviour
 {
-    enum STATE
+    public enum STATE
     {
         INVASION,
         FORMATION,
@@ -26,31 +26,58 @@ public class enemy : MonoBehaviour
     private float elapsedTime;
 
     private STATE state;
+
+    private GameObject mgr;
+    private enemyMgr scrMgr;
     // Start is called before the first frame update
     void Start()
     {
         distance = Vector3.Distance(startMarker.position, endMarker.position);
-        state = STATE.INVASION;
+        //state = STATE.INVASION;
 
         scrEnemybullet = bullePrefab.GetComponent<enemy_bullet>();
         cooltime = scrEnemybullet.GetCooltime();
+
+        mgr = GameObject.Find("GameManager");
+        scrMgr = mgr.GetComponent<enemyMgr>();
     }
 
     // Update is called once per frame
     void Update()
     {
+        
         cooltime -= Time.deltaTime;
 
-        Debug.Log(state);
+        //Debug.Log(state);
         elapsedTime += Time.deltaTime;
         battletime -= Time.deltaTime;
         float now_Location = (elapsedTime * speed) / distance;
 
-        transform.position = Vector3.Slerp(startMarker.position, endMarker.position, now_Location);
-
-        if(battletime <= 0.0f)
+        switch(state)
         {
-            state = STATE.WITHDRAW;
+            case STATE.INVASION:
+                transform.position = Vector3.Slerp(startMarker.position, endMarker.position, now_Location);
+
+                if (now_Location >= 1.0f)
+                {
+                    state = STATE.FORMATION;
+                    SetStartEnd(endMarker, mgr.transform.GetChild(CntDown(20)));
+                }
+                break;
+
+            case STATE.FORMATION:
+                transform.position = Vector3.Lerp(startMarker.position, endMarker.position, now_Location);
+                break;
+
+            case STATE.BATTLE:
+                if (battletime <= 0.0f)
+                {
+                    state = STATE.WITHDRAW;
+                }
+                break;
+
+            case STATE.WITHDRAW:
+                break;
         }
 
         if(cooltime <= 0.0f)
@@ -71,6 +98,21 @@ public class enemy : MonoBehaviour
 
         elapsedTime = 0.0f;
         distance = Vector3.Distance(startMarker.position, endMarker.position);
+    }
+
+    public STATE GetState()
+    {
+        return state;
+    }
+
+    public void SetInvasion()
+    {
+        state = STATE.INVASION;
+    }
+
+    int CntDown(int num)
+    {
+        return num - 1;
     }
 
     void OnTriggerEnter2D(Collider2D other)

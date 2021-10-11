@@ -1,5 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
+using System;
+using UniRx;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -8,6 +10,7 @@ public class enemyMgr : MonoBehaviour
     public GameObject obj;
     public GameObject enemyPrefab;
     private enemy scrEnemy;
+    private GameObject group;
     private float delay;
 
     private float width;
@@ -15,6 +18,8 @@ public class enemyMgr : MonoBehaviour
 
     private float height;
     private float height_space;
+
+    private int cnt;
 
     // Start is called before the first frame update
     void Start()
@@ -39,19 +44,45 @@ public class enemyMgr : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        Debug.Log(scrEnemy.GetState());
         if(Keyboard.current.eKey.wasPressedThisFrame)
         {
-            SpawnEnemy(5, 7, 50);
+            group = new GameObject("group");
+            cnt = 0;
+            SpawnEnemy(5, 7, 48);
         }
+
+        //if(scrEnemy.GetState() == enemy.STATE.FORMATION)
+        //{
+        //    int i = 0;
+        //    foreach(var child in group.transform)
+        //    {
+        //        scrEnemy = group.transform.GetChild(i).GetComponent<enemy>();
+        //        scrEnemy.SetStartEnd(transform.GetChild(7), transform.GetChild(50 - i));
+        //        i++;
+        //    }
+        //}
     }
 
     void SpawnEnemy(int enemy_num, int start_num, int end_num)
     {
-        for(int i = 0; i < enemy_num; i++)
+        Instantiate(enemyPrefab, Vector3.zero, Quaternion.identity, group.transform);
+
+        scrEnemy = group.transform.GetChild(cnt).GetComponent<enemy>();
+        scrEnemy.SetInvasion();
+        scrEnemy.SetStartEnd(transform.GetChild(start_num), transform.GetChild(end_num));
+        cnt++;
+
+        if(cnt < enemy_num )
         {
-            scrEnemy.SetStartEnd(transform.GetChild(start_num), transform.GetChild(end_num));
-            Instantiate(enemyPrefab, Vector3.zero, Quaternion.identity);
+            Observable.Timer(TimeSpan.FromSeconds(1)).Subscribe(_ => SpawnEnemy(enemy_num - 1,start_num,end_num));
         }
+        
+    }
+
+    public void NextPoint()
+    {
+        scrEnemy.SetStartEnd(transform.GetChild(48), transform.GetChild(22));
     }
 }
  
