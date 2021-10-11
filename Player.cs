@@ -5,7 +5,7 @@ using UnityEngine.InputSystem;
 
 public class Player : MonoBehaviour
 {
-    private enum BULLET_TYPE
+    public enum BULLET_TYPE
     {
         TYPE_A,
         TYPE_B,
@@ -16,30 +16,38 @@ public class Player : MonoBehaviour
     public int hp;
     public float speed;
     private float cooltime;
+    Quaternion rotZ_180;
     private Rigidbody2D rd;
 
     public GameObject[] bulletPrefab;
-    private BULLET_TYPE type = BULLET_TYPE.TYPE_A;
+
+    [System.NonSerialized]
+    public BULLET_TYPE type = BULLET_TYPE.TYPE_A;
     private GameObject barrelforward;
     private GameObject barrelback;
 
-    private Bullet_typeA ScrBulletA;
-    private Bullet_typeB ScrBulletB;
-    private Bullet_typeC ScrBulletC;
+    [SerializeField]
+    private GameObject Mgr;
+    private TimeMgr timeMgr;
+
+    private Bullet ScrBullet;
 
 
     // Start is called before the first frame update
     void Start()
     {
-        ScrBulletA = bulletPrefab[(int)BULLET_TYPE.TYPE_A].GetComponent<Bullet_typeA>();
-        ScrBulletB = bulletPrefab[(int)BULLET_TYPE.TYPE_B].GetComponent<Bullet_typeB>();
-        ScrBulletC = bulletPrefab[(int)BULLET_TYPE.TYPE_C].GetComponent<Bullet_typeC>();
+        timeMgr = Mgr.GetComponent<TimeMgr>();
 
-        ScrBulletA.pow = Bullet_typeA.POW_STATE.STATE_1;
-        ScrBulletB.pow = Bullet_typeB.POW_STATE.STATE_1;
-        ScrBulletC.pow = Bullet_typeC.POW_STATE.STATE_1;
+        ScrBullet = bulletPrefab[(int)BULLET_TYPE.TYPE_A].GetComponent<Bullet>();
 
-        cooltime = ScrBulletA.GetCooltime();
+        bulletPrefab[(int)BULLET_TYPE.TYPE_A].GetComponent<Bullet>().pow = Bullet.POW_STATE.STATE_1;
+        bulletPrefab[(int)BULLET_TYPE.TYPE_B].GetComponent<Bullet>().pow = Bullet.POW_STATE.STATE_1;
+        bulletPrefab[(int)BULLET_TYPE.TYPE_C].GetComponent<Bullet>().pow = Bullet.POW_STATE.STATE_1;
+
+        cooltime = ScrBullet.GetCooltime();
+        rotZ_180 = Quaternion.AngleAxis(180.0f, new Vector3(0.0f, 0.0f, 1.0f));
+
+        //cooltime = ScrBulletA.GetCooltime();
         rd = GetComponent<Rigidbody2D>();
 
         barrelforward = transform.Find("barrel_forward").gameObject;
@@ -49,177 +57,179 @@ public class Player : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        cooltime -= 1.0f;
+        cooltime -= Time.deltaTime;
 
 
         if (Keyboard.current.upArrowKey.isPressed || Keyboard.current.wKey.isPressed)
         {
-            transform.position += new Vector3(0, speed, 0) * Time.deltaTime;
+            transform.position += new Vector3(0, speed, 0) * Time.deltaTime * timeMgr.GetGameSpeed();
         }
         if (Keyboard.current.downArrowKey.isPressed || Keyboard.current.sKey.isPressed)
         {
-            transform.position += new Vector3(0, -speed, 0) * Time.deltaTime;
+            transform.position += new Vector3(0, -speed, 0) * Time.deltaTime * timeMgr.GetGameSpeed();
         }
         if (Keyboard.current.rightArrowKey.isPressed || Keyboard.current.dKey.isPressed)
         {
-            transform.position += new Vector3(speed, 0, 0) * Time.deltaTime;
+            transform.position += new Vector3(speed, 0, 0) * Time.deltaTime * timeMgr.GetGameSpeed();
         }
         if (Keyboard.current.leftArrowKey.isPressed || Keyboard.current.aKey.isPressed)
         {
-            transform.position += new Vector3(-speed, 0, 0) * Time.deltaTime;
+            transform.position += new Vector3(-speed, 0, 0) * Time.deltaTime * timeMgr.GetGameSpeed();
         }
 
 
-        if (Keyboard.current.digit1Key.wasPressedThisFrame)
+        if (timeMgr.GetGameSpeed() > 0.1f)
         {
-            type = BULLET_TYPE.TYPE_A;
-        }
-        if (Keyboard.current.digit2Key.wasPressedThisFrame)
-        {
-            type = BULLET_TYPE.TYPE_B;
-        }
-        if (Keyboard.current.digit3Key.wasPressedThisFrame)
-        {
-            type = BULLET_TYPE.TYPE_C;
-        }
 
-
-        switch (type)
-        {
-            case BULLET_TYPE.TYPE_A:
-                if (Keyboard.current.spaceKey.isPressed)
+            if (Keyboard.current.iKey.wasPressedThisFrame)
+            {
+                type++;
+                if (type == BULLET_TYPE.TYPE_MAX)
                 {
-                    switch(ScrBulletA.GetPowState())
-                    {
-                        case Bullet_typeA.POW_STATE.STATE_1:
-                            Debug.Log(ScrBulletA.GetPowState());
-                            if (cooltime <= 0.0f)
-                            {
-                                for(int i = 0; i <= (int)ScrBulletA.GetPowState() + 1;i++)
-                                {
-                                    Instantiate(bulletPrefab[(int)type], barrelforward.transform.position + new Vector3(0.0f, 25.0f - i * 50.0f, 0.0f), Quaternion.identity);
-                                }
-                                //Instantiate(bulletPrefab[(int)type], barrelforward.transform.position + new Vector3(0.0f, 25.0f, 0.0f), Quaternion.identity);
-                                //Instantiate(bulletPrefab[(int)type], barrelforward.transform.position + new Vector3(0.0f, -25.0f, 0.0f), Quaternion.identity);
-                                cooltime = ScrBulletA.GetCooltime();
-                            }
-                            break;
-
-                        case Bullet_typeA.POW_STATE.STATE_2:
-                            if (cooltime <= 0.0f)
-                            {
-                                for (int i = 0; i <= (int)ScrBulletA.GetPowState() + 1; i++)
-                                {
-                                    Instantiate(bulletPrefab[(int)type], barrelforward.transform.position + new Vector3(0.0f + ((i % 2) * 50.0f), 50.0f - i * 50.0f, 0.0f), Quaternion.identity);
-                                }
-                                cooltime = ScrBulletA.GetCooltime();
-                            }
-                            break;
-
-                        case Bullet_typeA.POW_STATE.STATE_3:
-                            if (cooltime <= 0.0f)
-                            {
-                                for (int i = 0; i < (int)ScrBulletA.GetPowState(); i++)
-                                {
-                                    Instantiate(bulletPrefab[(int)type], barrelforward.transform.position + new Vector3(50.0f, 25.0f - (i * 50.0f), 0.0f), Quaternion.identity);
-                                    Instantiate(bulletPrefab[(int)type], barrelforward.transform.position + new Vector3(0.0f, 75.0f - (i * 150.0f), 0.0f), Quaternion.identity);
-                                }
-                                cooltime = ScrBulletA.GetCooltime();
-                            }
-                            break;
-                    }
+                    type = BULLET_TYPE.TYPE_A;
                 }
-                break;
+            }
 
-            case BULLET_TYPE.TYPE_B:
-                if (Keyboard.current.spaceKey.isPressed)
-                {
-                    switch (ScrBulletB.GetPowState())
+
+            switch (type)
+            {
+                case BULLET_TYPE.TYPE_A:
+                    ScrBullet = bulletPrefab[(int)BULLET_TYPE.TYPE_A].GetComponent<Bullet>();
+                    if (Keyboard.current.jKey.isPressed || Keyboard.current.kKey.isPressed || Keyboard.current.lKey.isPressed)
                     {
-                        case Bullet_typeB.POW_STATE.STATE_1:
-                            if (cooltime <= 0.0f)
-                            {
-                                Quaternion rot = Quaternion.AngleAxis(180.0f, new Vector3(0.0f, 0.0f, 1.0f));
-                                Instantiate(bulletPrefab[(int)type], barrelforward.transform.position, rot);
-                                Instantiate(bulletPrefab[(int)type], barrelback.transform.position, Quaternion.identity);
-                                cooltime = ScrBulletB.GetCooltime();
-                            }
-                            break;
-
-                        case Bullet_typeB.POW_STATE.STATE_2:
-                            if (cooltime <= 0.0f)
-                            {
-                                Quaternion rot = Quaternion.AngleAxis(180.0f, new Vector3(0.0f, 0.0f, 1.0f));
-                                Instantiate(bulletPrefab[(int)type], barrelforward.transform.position, rot);
-                                for(int i = 0; i < (int)ScrBulletB.GetPowState() + 1; i++)
+                        switch (ScrBullet.GetPowState())
+                        {
+                            case Bullet.POW_STATE.STATE_1:
+                                //Debug.Log(ScrBulletA.GetPowState());
+                                if (cooltime <= 0.0f)
                                 {
-                                    Instantiate(bulletPrefab[(int)type], barrelback.transform.position + new Vector3(0.0f, 25.0f - i * 50.0f, 0.0f), Quaternion.identity);
+                                    for (int i = 0; i <= (int)ScrBullet.GetPowState() + 1; i++)//ScrBulletA.GetPowState() + 1
+                                    {
+                                        Instantiate(bulletPrefab[(int)type], barrelforward.transform.position + new Vector3(0.0f, 25.0f - i * 50.0f, 0.0f), rotZ_180);
+                                    }
+                                    //Instantiate(bulletPrefab[(int)type], barrelforward.transform.position + new Vector3(0.0f, 25.0f, 0.0f), Quaternion.identity);
+                                    //Instantiate(bulletPrefab[(int)type], barrelforward.transform.position + new Vector3(0.0f, -25.0f, 0.0f), Quaternion.identity);
+                                    cooltime = ScrBullet.GetCooltime();//ScrBulletA.GetCooltime();
                                 }
-                                cooltime = ScrBulletB.GetCooltime();
-                            }
-                            break;
+                                break;
 
-                        case Bullet_typeB.POW_STATE.STATE_3:
-                            if (cooltime <= 0.0f)
-                            {
-                                Quaternion rot = Quaternion.AngleAxis(180.0f, new Vector3(0.0f, 0.0f, 1.0f));
-                                Instantiate(bulletPrefab[(int)type], barrelforward.transform.position, rot);
-                                for (int i = 0; i < (int)ScrBulletB.GetPowState() + 1; i++)
+                            case Bullet.POW_STATE.STATE_2:
+                                if (cooltime <= 0.0f)
                                 {
-                                    Instantiate(bulletPrefab[(int)type], barrelback.transform.position + new Vector3(0.0f - ((i % 2) * 50.0f), 50.0f - i * 50.0f, 0.0f), Quaternion.identity);
+                                    for (int i = 0; i <= (int)ScrBullet.GetPowState() + 1; i++)
+                                    {
+                                        Instantiate(bulletPrefab[(int)type], barrelforward.transform.position + new Vector3(0.0f + ((i % 2) * 50.0f), 50.0f - i * 50.0f, 0.0f), rotZ_180);
+                                    }
+                                    cooltime = ScrBullet.GetCooltime();
                                 }
-                                cooltime = ScrBulletB.GetCooltime();
-                            }
-                            break;
+                                break;
+
+                            case Bullet.POW_STATE.STATE_3:
+                                if (cooltime <= 0.0f)
+                                {
+                                    for (int i = 0; i < (int)ScrBullet.GetPowState(); i++)
+                                    {
+                                        Instantiate(bulletPrefab[(int)type], barrelforward.transform.position + new Vector3(50.0f, 25.0f - (i * 50.0f), 0.0f), rotZ_180);
+                                        Instantiate(bulletPrefab[(int)type], barrelforward.transform.position + new Vector3(0.0f, 75.0f - (i * 150.0f), 0.0f), rotZ_180);
+                                    }
+                                    cooltime = ScrBullet.GetCooltime();
+                                }
+                                break;
+                        }
                     }
-                    
-                }
-                break;
+                    break;
 
-            case BULLET_TYPE.TYPE_C:
-                if (Keyboard.current.spaceKey.isPressed)
-                {
-                    Quaternion angle1, angle2, angle3;
-                    angle1 = Quaternion.AngleAxis(210.0f, new Vector3(0.0f, 0.0f, 1.0f));
-                    angle2 = Quaternion.AngleAxis(150.0f, new Vector3(0.0f, 0.0f, 1.0f));
-                    switch (ScrBulletC.GetPowState())
+                case BULLET_TYPE.TYPE_B:
+                    ScrBullet = bulletPrefab[(int)BULLET_TYPE.TYPE_B].GetComponent<Bullet>();
+                    if (Keyboard.current.jKey.isPressed || Keyboard.current.kKey.isPressed || Keyboard.current.lKey.isPressed)
                     {
-                        case Bullet_typeC.POW_STATE.STATE_1:
-                            if (cooltime <= 0.0f)
-                            {
-                                Instantiate(bulletPrefab[(int)type], barrelforward.transform.position + new Vector3(0.0f, 50.0f, 0.0f), angle1);
-                                Instantiate(bulletPrefab[(int)type], barrelforward.transform.position + new Vector3(0.0f, -50.0f, 0.0f), angle2);
-                                cooltime = ScrBulletC.GetCooltime();
-                            }
-                            break;
+                        switch (ScrBullet.GetPowState())
+                        {
+                            case Bullet.POW_STATE.STATE_1:
+                                if (cooltime <= 0.0f)
+                                {
+                                    Instantiate(bulletPrefab[(int)type], barrelforward.transform.position, rotZ_180);
+                                    Instantiate(bulletPrefab[(int)type], barrelback.transform.position, Quaternion.identity);
+                                    cooltime = ScrBullet.GetCooltime();
+                                }
+                                break;
 
-                        case Bullet_typeC.POW_STATE.STATE_2:
-                            if (cooltime <= 0.0f)
-                            {
-                                angle3 = Quaternion.AngleAxis(180.0f, new Vector3(0.0f, 0.0f, 1.0f));
-                                Instantiate(bulletPrefab[(int)type], barrelforward.transform.position + new Vector3(0.0f, 50.0f, 0.0f), angle1);
-                                Instantiate(bulletPrefab[(int)type], barrelforward.transform.position, angle3);
-                                Instantiate(bulletPrefab[(int)type], barrelforward.transform.position + new Vector3(0.0f, -50.0f, 0.0f), angle2);
-                                cooltime = ScrBulletC.GetCooltime();
-                            }
-                            break;
+                            case Bullet.POW_STATE.STATE_2:
+                                if (cooltime <= 0.0f)
+                                {
+                                    Instantiate(bulletPrefab[(int)type], barrelforward.transform.position, rotZ_180);
+                                    for (int i = 0; i < (int)ScrBullet.GetPowState() + 1; i++)
+                                    {
+                                        Instantiate(bulletPrefab[(int)type], barrelback.transform.position + new Vector3(0.0f, 25.0f - i * 50.0f, 0.0f), Quaternion.identity);
+                                    }
+                                    cooltime = ScrBullet.GetCooltime();
+                                }
+                                break;
 
-                        case Bullet_typeC.POW_STATE.STATE_3:
-                            if (cooltime <= 0.0f)
-                            {
-                                angle3 = Quaternion.AngleAxis(180.0f, new Vector3(0.0f, 0.0f, 1.0f));
-                                Instantiate(bulletPrefab[(int)type], barrelforward.transform.position + new Vector3(0.0f, 50.0f, 0.0f), angle1);
-                                Instantiate(bulletPrefab[(int)type], barrelforward.transform.position, angle3);
-                                Instantiate(bulletPrefab[(int)type], barrelforward.transform.position + new Vector3(0.0f, -50.0f, 0.0f), angle2);
-                                cooltime = ScrBulletC.GetCooltime();
-                            }
+                            case Bullet.POW_STATE.STATE_3:
+                                if (cooltime <= 0.0f)
+                                {
+                                    Instantiate(bulletPrefab[(int)type], barrelforward.transform.position, rotZ_180);
+                                    for (int i = 0; i < (int)ScrBullet.GetPowState() + 1; i++)
+                                    {
+                                        Instantiate(bulletPrefab[(int)type], barrelback.transform.position + new Vector3(0.0f - ((i % 2) * 50.0f), 50.0f - i * 50.0f, 0.0f), Quaternion.identity);
+                                    }
+                                    cooltime = ScrBullet.GetCooltime();
+                                }
+                                break;
+                        }
 
-                            //ˆÐ—ÍUP
-                            break;
                     }
-                }
-                break;
+                    break;
+
+                case BULLET_TYPE.TYPE_C:
+                    ScrBullet = bulletPrefab[(int)BULLET_TYPE.TYPE_C].GetComponent<Bullet>();
+                    if (Keyboard.current.jKey.isPressed || Keyboard.current.kKey.isPressed || Keyboard.current.lKey.isPressed)
+                    {
+                        Quaternion angle1, angle2, angle3;
+                        angle1 = Quaternion.AngleAxis(210.0f, new Vector3(0.0f, 0.0f, 1.0f));
+                        angle2 = Quaternion.AngleAxis(150.0f, new Vector3(0.0f, 0.0f, 1.0f));
+                        switch (ScrBullet.GetPowState())
+                        {
+                            case Bullet.POW_STATE.STATE_1:
+                                if (cooltime <= 0.0f)
+                                {
+                                    Instantiate(bulletPrefab[(int)type], barrelforward.transform.position + new Vector3(0.0f, 50.0f, 0.0f), angle1);
+                                    Instantiate(bulletPrefab[(int)type], barrelforward.transform.position + new Vector3(0.0f, -50.0f, 0.0f), angle2);
+                                    cooltime = ScrBullet.GetCooltime();
+                                }
+                                break;
+
+                            case Bullet.POW_STATE.STATE_2:
+                                if (cooltime <= 0.0f)
+                                {
+                                    angle3 = Quaternion.AngleAxis(180.0f, new Vector3(0.0f, 0.0f, 1.0f));
+                                    Instantiate(bulletPrefab[(int)type], barrelforward.transform.position + new Vector3(0.0f, 50.0f, 0.0f), angle1);
+                                    Instantiate(bulletPrefab[(int)type], barrelforward.transform.position, angle3);
+                                    Instantiate(bulletPrefab[(int)type], barrelforward.transform.position + new Vector3(0.0f, -50.0f, 0.0f), angle2);
+                                    cooltime = ScrBullet.GetCooltime();
+                                }
+                                break;
+
+                            case Bullet.POW_STATE.STATE_3:
+                                if (cooltime <= 0.0f)
+                                {
+                                    angle3 = Quaternion.AngleAxis(180.0f, new Vector3(0.0f, 0.0f, 1.0f));
+                                    Instantiate(bulletPrefab[(int)type], barrelforward.transform.position + new Vector3(0.0f, 50.0f, 0.0f), angle1);
+                                    Instantiate(bulletPrefab[(int)type], barrelforward.transform.position, angle3);
+                                    Instantiate(bulletPrefab[(int)type], barrelforward.transform.position + new Vector3(0.0f, -50.0f, 0.0f), angle2);
+                                    cooltime = ScrBullet.GetCooltime();
+                                }
+
+                                //ˆÐ—ÍUP
+                                break;
+                        }
+                    }
+                    break;
+            }
+
         }
+
     }
 
 
@@ -233,16 +243,15 @@ public class Player : MonoBehaviour
             switch(type)
             {
                 case BULLET_TYPE.TYPE_A:
-                    ScrBulletA.LevelUp();
-                    //ScrBulletA.pow++;
+                    ScrBullet.LevelUp();
                     break;
 
                 case BULLET_TYPE.TYPE_B:
-                    ScrBulletB.LevelUp();
+                    ScrBullet.LevelUp();
                     break;
 
                 case BULLET_TYPE.TYPE_C:
-                    ScrBulletC.LevelUp();
+                    ScrBullet.LevelUp();
                     break;
             }
         }
