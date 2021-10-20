@@ -14,11 +14,14 @@ public class Player : MonoBehaviour
         TYPE_MAX
     };
 
-    public int hp;
+    public int remaining;
+    public int max_hp;
+    private int now_hp;
     public float speed;
     private Vector3 move;
     private float powValue;
     private float cooltime;
+    private bool isFire = false;
     Quaternion rotZ_180;
     private Rigidbody2D rd;
 
@@ -57,6 +60,8 @@ public class Player : MonoBehaviour
         barrelback = transform.Find("barrel_back").gameObject;
 
         move = new Vector3(0.0f,0.0f,0.0f);
+
+        now_hp = max_hp;
     }
 
     public void OnMove(InputAction.CallbackContext context)
@@ -66,15 +71,57 @@ public class Player : MonoBehaviour
 
     public void OnFire(InputAction.CallbackContext context)
     {
-        if (context.phase == InputActionPhase.Performed)
+        if (context.phase == InputActionPhase.Started)
+        {
+            isFire = true;
+        }
+        
+        if(context.phase == InputActionPhase.Canceled)
+        {
+            isFire = false;
+        }
+    }
+
+    public void OnBulletChange(InputAction.CallbackContext context)
+    {
+        if (context.phase == InputActionPhase.Started)
+        {
+            type++;
+        }
+    }
+
+    // Update is called once per frame
+    void Update()
+    {
+        cooltime -= Time.deltaTime;
+
+        transform.Translate(move * speed * Time.deltaTime * timeMgr.GetGameSpeed());
+
+        if (type == BULLET_TYPE.TYPE_MAX)
+        {
+            type = BULLET_TYPE.TYPE_A;
+        }
+
+        switch(type)
+        {
+            case BULLET_TYPE.TYPE_A:
+                ScrBullet = bulletPrefab[(int)BULLET_TYPE.TYPE_A].GetComponent<Bullet>();
+                break;
+            case BULLET_TYPE.TYPE_B:
+                ScrBullet = bulletPrefab[(int)BULLET_TYPE.TYPE_B].GetComponent<Bullet>();
+                break;
+            case BULLET_TYPE.TYPE_C:
+                ScrBullet = bulletPrefab[(int)BULLET_TYPE.TYPE_C].GetComponent<Bullet>();
+                break;
+        }
+
+        if (isFire)
         {
             if (timeMgr.GetGameSpeed() > 0.1f)
             {
                 switch (type)
                 {
                     case BULLET_TYPE.TYPE_A:
-                        ScrBullet = bulletPrefab[(int)BULLET_TYPE.TYPE_A].GetComponent<Bullet>();
-
                         switch (ScrBullet.GetPowState())
                         {
                             case Bullet.POW_STATE.STATE_1:
@@ -117,7 +164,6 @@ public class Player : MonoBehaviour
                         break;
 
                     case BULLET_TYPE.TYPE_B:
-                        ScrBullet = bulletPrefab[(int)BULLET_TYPE.TYPE_B].GetComponent<Bullet>();
                         switch (ScrBullet.GetPowState())
                         {
                             case Bullet.POW_STATE.STATE_1:
@@ -156,7 +202,6 @@ public class Player : MonoBehaviour
                         break;
 
                     case BULLET_TYPE.TYPE_C:
-                        ScrBullet = bulletPrefab[(int)BULLET_TYPE.TYPE_C].GetComponent<Bullet>();
                         Quaternion angle1, angle2, angle3;
                         angle1 = Quaternion.AngleAxis(210.0f, new Vector3(0.0f, 0.0f, 1.0f));
                         angle2 = Quaternion.AngleAxis(150.0f, new Vector3(0.0f, 0.0f, 1.0f));
@@ -202,28 +247,15 @@ public class Player : MonoBehaviour
         }
     }
 
-    public void OnBulletChange(InputAction.CallbackContext context)
+    public int GetNowHP()
     {
-        if (context.phase == InputActionPhase.Started)
-        {
-            type++;
-        }
+        return now_hp;
     }
 
-    // Update is called once per frame
-    void Update()
+    public int GetRemaining()
     {
-        cooltime -= Time.deltaTime;
-
-        transform.Translate(move * speed * Time.deltaTime * timeMgr.GetGameSpeed());
-
-        if (type == BULLET_TYPE.TYPE_MAX)
-        {
-            type = BULLET_TYPE.TYPE_A;
-        }
-
+        return remaining;
     }
-
 
     void OnTriggerEnter2D(Collider2D other)
     {
@@ -248,22 +280,4 @@ public class Player : MonoBehaviour
             }
         }
     }
-
-    //void FixedUpdate()
-    //{
-
-    //    if (Keyboard.current.rightArrowKey.isPressed)
-    //    {
-    //        rd.velocity = new Vector2(speed, rd.velocity.y);
-    //    }
-    //    else if (Keyboard.current.leftArrowKey.isPressed)
-    //    {
-    //        rd.velocity = new Vector2(-speed, rd.velocity.y);
-    //    }
-
-    //    else
-    //    {
-    //        rd.velocity = Vector2.zero;
-    //    }
-    //}
 }

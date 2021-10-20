@@ -6,7 +6,6 @@ public class enemy_bullet : MonoBehaviour
 {
 
     public float speed;
-    public float cooltime;
 
     private GameObject Mgr;
     private TimeMgr timeMgr;
@@ -24,17 +23,11 @@ public class enemy_bullet : MonoBehaviour
         Vector3 dir = new Vector3(Mathf.Cos(angle), Mathf.Sin(angle), 0.0f);
 
         transform.position -= dir * speed * Time.deltaTime * timeMgr.GetGameSpeed();
-        //transform.position += new Vector3(speed, 0, 0) * Time.deltaTime;
 
         if (transform.position.x > 960 || transform.position.x < -960 ||
             transform.position.y > 540 || transform.position.y < -540)
         {
             Destroy(gameObject);
         }
-    }
-
-    public float GetCooltime()
-    {
-        return cooltime;
     }
 }

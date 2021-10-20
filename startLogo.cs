@@ -11,14 +11,13 @@ public class startLogo : MonoBehaviour
     public float height;
     private RectTransform rect;
 
-    GameObject TitleMgr;
-    TitleManager TitleScrpt;
+    public GameObject TitleMgr;
+    TitleManager scrMgr;
 
     // Start is called before the first frame update
     void Start()
     {
-        TitleMgr = GameObject.Find("TitleManager");
-        TitleScrpt = TitleMgr.GetComponent<TitleManager>();
+        scrMgr = TitleMgr.GetComponent<TitleManager>();
 
         rect = gameObject.GetComponent<RectTransform>();
     }
@@ -26,15 +25,13 @@ public class startLogo : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (TitleScrpt.state == TitleScrpt.GetModeStart())
+        if (scrMgr.state == scrMgr.GetModeStart())
         {
             this.gameObject.GetComponent<Image>().sprite = btnLogo1;
-            rect.sizeDelta = new Vector2(width, height);
         }
         else
         {
             this.gameObject.GetComponent<Image>().sprite = btnLogo2;
-            rect.sizeDelta = new Vector2(width / 1.5f, height / 1.5f);
         }
     }
 
