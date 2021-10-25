@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using QFSW.MOP2;
 
 public class Bullet : MonoBehaviour
 {
@@ -19,6 +20,10 @@ public class Bullet : MonoBehaviour
 
     private GameObject Mgr;
     private TimeMgr timeMgr;
+
+    //ObjectPool
+    [SerializeField]
+    private ObjectPool BulletPool;
 
     // Start is called before the first frame update
     void Start()
@@ -41,7 +46,8 @@ public class Bullet : MonoBehaviour
         if (transform.position.x > 960 || transform.position.x < -960 ||
             transform.position.y > 540 || transform.position.y < -540)
         {
-            Destroy(gameObject);
+            //Destroy(gameObject);
+            BulletPool.Release(gameObject);
         }
     }
 
@@ -62,5 +68,13 @@ public class Bullet : MonoBehaviour
         {
             pow = POW_STATE.STATE_3;
         }
+    }
+
+    void OnTriggerEnter2D(Collider2D other)
+    {
+        if(gameObject.activeInHierarchy)
+        {
+            BulletPool.Release(gameObject);
+        }      
     }
 }

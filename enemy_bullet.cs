@@ -1,14 +1,22 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using QFSW.MOP2;
+
 
 public class enemy_bullet : MonoBehaviour
 {
+    [SerializeField]
+    private float speed;
 
-    public float speed;
+    public int damage;
 
     private GameObject Mgr;
     private TimeMgr timeMgr;
+
+    //ObjectPool
+    [SerializeField]
+    private ObjectPool BulletPool;
     // Start is called before the first frame update
     void Start()
     {
@@ -27,7 +35,8 @@ public class enemy_bullet : MonoBehaviour
         if (transform.position.x > 960 || transform.position.x < -960 ||
             transform.position.y > 540 || transform.position.y < -540)
         {
-            Destroy(gameObject);
+            //Destroy(gameObject);
+            BulletPool.Release(gameObject);
         }
     }
 }

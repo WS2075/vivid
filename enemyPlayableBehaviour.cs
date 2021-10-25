@@ -12,6 +12,7 @@ public class enemyPlayableBehaviour : PlayableBehaviour
     public int EndPosNum;
     public int FormationPosNum;
     public enemy.MOVE_TYPE move_type;
+    public enemy.BULLET_TYPE bullet_type;
     private enemy ScrEnemy;
 
     public override void ProcessFrame(Playable playable, FrameData info, object playerData)
@@ -55,6 +56,7 @@ public class enemyPlayableBehaviour : PlayableBehaviour
             ScrEnemy.endPosNum = EndPosNum;
             ScrEnemy.formationPosNum = FormationPosNum;
             ScrEnemy.move_type = move_type;
+            ScrEnemy.bullet_type = bullet_type;
             Debug.Log(EndPosNum);
             Debug.Log(move_type);
         }

@@ -18,13 +18,14 @@ public class TitleManager : MonoBehaviour
 
     public MODE_STATE state;
 
-    private SEManager scrSEMgr;
+    //private SEManager scrSEMgr;
 
     // Start is called before the first frame update
     void Start()
     {
         state = MODE_STATE.MODE_START;
-        scrSEMgr = GetComponent<SEManager>();
+        SoundManager.instance.PlayBGM(SoundManager.BGM_TYPE.BGM_TITLE);
+        //scrSEMgr = GetComponent<SEManager>();
     }
 
     // Update is called once per frame
@@ -36,8 +37,9 @@ public class TitleManager : MonoBehaviour
                 if (Keyboard.current.upArrowKey.wasPressedThisFrame || Keyboard.current.wKey.wasPressedThisFrame)
                 {
                     --state;
-                    scrSEMgr.SE2();
-                    if(state >= MODE_STATE.MODE_MIN)
+                    //scrSEMgr.SE2();
+                    SoundManager.instance.PlaySE(SoundManager.SE_TYPE.SE_CURSOR);
+                    if (state >= MODE_STATE.MODE_MIN)
                     {
                         state = MODE_STATE.MODE_CREDIT;
                     }
@@ -45,16 +47,19 @@ public class TitleManager : MonoBehaviour
                 if (Keyboard.current.downArrowKey.wasPressedThisFrame || Keyboard.current.sKey.wasPressedThisFrame)
                 {
                     ++state;
-                    scrSEMgr.SE2();
+                    //scrSEMgr.SE2();
+                    SoundManager.instance.PlaySE(SoundManager.SE_TYPE.SE_CURSOR);
                 }
 
                 if (Keyboard.current.enterKey.isPressed)
                 {
-                    scrSEMgr.SE1();
-                    if (scrSEMgr.SECheck())
-                    {
-                        SceneManager.LoadScene("Game", LoadSceneMode.Single);
-                    }
+                    SoundManager.instance.PlaySE(SoundManager.SE_TYPE.SE_OK);
+                    SceneManager.LoadScene("Game", LoadSceneMode.Single);
+                    //scrSEMgr.SE1();
+                    //if (scrSEMgr.SECheck())
+                    //{
+
+                    //}
                 }
                 break;
 
@@ -62,17 +67,20 @@ public class TitleManager : MonoBehaviour
                 if (Keyboard.current.upArrowKey.wasPressedThisFrame || Keyboard.current.wKey.wasPressedThisFrame)
                 {
                     --state;
-                    scrSEMgr.SE2();
+                    SoundManager.instance.PlaySE(SoundManager.SE_TYPE.SE_CURSOR);
+                    //scrSEMgr.SE2();
                 }
                 if (Keyboard.current.downArrowKey.wasPressedThisFrame || Keyboard.current.sKey.wasPressedThisFrame)
                 {
                     ++state;
-                    scrSEMgr.SE2();
+                    SoundManager.instance.PlaySE(SoundManager.SE_TYPE.SE_CURSOR);
+                    //scrSEMgr.SE2();
                 }
 
                 if (Keyboard.current.enterKey.wasPressedThisFrame)
                 {
-                    scrSEMgr.SE1();
+                    //scrSEMgr.SE1();
+                    SoundManager.instance.PlaySE(SoundManager.SE_TYPE.SE_OK);
                     Debug.Log(state);
                 }
                 break;
@@ -81,12 +89,14 @@ public class TitleManager : MonoBehaviour
                 if (Keyboard.current.upArrowKey.wasPressedThisFrame || Keyboard.current.wKey.wasPressedThisFrame)
                 {
                     --state;
-                    scrSEMgr.SE2();
+                    SoundManager.instance.PlaySE(SoundManager.SE_TYPE.SE_CURSOR);
+                    //scrSEMgr.SE2();
                 }
                 if (Keyboard.current.downArrowKey.wasPressedThisFrame || Keyboard.current.sKey.wasPressedThisFrame)
                 {
                     ++state;
-                    scrSEMgr.SE2();
+                    SoundManager.instance.PlaySE(SoundManager.SE_TYPE.SE_CURSOR);
+                    //scrSEMgr.SE2();
                     if (state <= MODE_STATE.MODE_MAX)
                     {
                         state = MODE_STATE.MODE_START;
@@ -95,7 +105,8 @@ public class TitleManager : MonoBehaviour
 
                 if (Keyboard.current.enterKey.wasPressedThisFrame)
                 {
-                    scrSEMgr.SE1();
+                    SoundManager.instance.PlaySE(SoundManager.SE_TYPE.SE_OK);
+                    //scrSEMgr.SE1();
                     Debug.Log(state);
                 }
                 break;

@@ -6,6 +6,10 @@ using UnityEngine.InputSystem;
 
 public class Manager : MonoBehaviour
 {
+    [SerializeField]
+    private GameObject player;
+    private Player scrPlayer;
+
     //仮
     [SerializeField]
     private GameObject item;
@@ -14,12 +18,17 @@ public class Manager : MonoBehaviour
     private GameObject pause;
 
     private bool isPause;
+    private bool isSpaen;
     TimeMgr timeMgr;
     // Start is called before the first frame update
     void Start()
     {
         isPause = false;
+        isSpaen = false;
         timeMgr = GetComponent<TimeMgr>();
+        SoundManager.instance.PlayBGM(SoundManager.BGM_TYPE.BGM_GAME);
+
+        scrPlayer = player.GetComponent<Player>();
     }
 
     // Update is called once per frame
@@ -39,6 +48,13 @@ public class Manager : MonoBehaviour
         {
             SceneManager.LoadScene("Title", LoadSceneMode.Single);
         }
+
+        if (!player.activeSelf && isSpaen == false)
+        {
+            isSpaen = true;
+            StartCoroutine(ReSpawn());
+        }
+
     }
 
     public void isPaused()
@@ -61,5 +77,17 @@ public class Manager : MonoBehaviour
     public bool nowPause()
     {
         return isPause;
+    }
+
+    private IEnumerator ReSpawn()
+    {
+        if (scrPlayer.remaining > 0)
+        {
+            yield return new WaitForSeconds(2.0f);
+            player.SetActive(true);
+            scrPlayer.ReSpawn();
+            isSpaen = false;
+            Debug.Log("ReSpawn");
+        }
     }
 }

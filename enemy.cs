@@ -4,8 +4,9 @@ using UnityEngine;
 using UnityEngine.Timeline;
 using UnityEngine.Playables;
 using System.Linq;
+using QFSW.MOP2;
 
-public class enemy : MonoBehaviour
+public class enemy : MonoBehaviour, ITimeControl
 {
     public enum STATE
     {
@@ -36,14 +37,24 @@ public class enemy : MonoBehaviour
     public float battletime;
     public bool isMiddle;
     public MOVE_TYPE move_type;
+    private bool isActive;
     
     [Header("Bullet")]
     public BULLET_TYPE bullet_type;
     public GameObject barrel;
-    public GameObject bulletPrefab;
-    public GameObject homingBullet;
+    public GameObject normalBulletPrefab;
+    public GameObject spreadBulletPrefab;
+    public GameObject homingBulletPrefab;
     public float cooltime;
     private float default_cooltime;
+
+    [Header("Bullet Pool")]
+    [SerializeField]
+    private ObjectPool NormalBulletPool;
+    [SerializeField]
+    private ObjectPool SpreadBulletPool;
+    [SerializeField]
+    private ObjectPool HomingBulletPool;
 
     [Header("No Touch")]
     public int startPosNum;
@@ -66,10 +77,31 @@ public class enemy : MonoBehaviour
 
     private GameObject mgr;
 
-    //playable
-    private GameObject playableObj;
-    private PlayableDirector director;
+    private GameObject bulletCase;
 
+    ////playable
+    //private GameObject playableObj;
+    //private PlayableDirector director;
+
+
+    public void OnControlTimeStart()
+    {
+        gameObject.SetActive(true);
+        isActive = true;
+    }
+
+    public void OnControlTimeStop()
+    {
+        gameObject.SetActive(false);
+    }
+
+    public void SetTime(double time)
+    {
+        if(!isActive)
+        {
+            gameObject.SetActive(false);
+        }
+    }
 
     // Start is called before the first frame update
     void Start()
@@ -78,7 +110,7 @@ public class enemy : MonoBehaviour
 
         default_cooltime = cooltime;
 
-        scrEnemybullet = bulletPrefab.GetComponent<enemy_bullet>();
+        //scrEnemybullet = bulletPrefab.GetComponent<enemy_bullet>();
 
         mgr = GameObject.Find("GameManager");
 
@@ -99,6 +131,8 @@ public class enemy : MonoBehaviour
 
         angle1 = Quaternion.AngleAxis(30.0f, new Vector3(0.0f, 0.0f, 1.0f));
         angle2 = Quaternion.AngleAxis(-30.0f, new Vector3(0.0f, 0.0f, 1.0f));
+
+        bulletCase = GameObject.Find("BulletCase");
     }
 
     // Update is called once per frame
@@ -195,6 +229,7 @@ public class enemy : MonoBehaviour
                     {
                         SetStartEnd(endMarker, startMarker);
                         withdraw_phase2 = true;
+                        break;
                     }
                 }
                 
@@ -203,6 +238,8 @@ public class enemy : MonoBehaviour
                 {
                     if(now_Location >= 1.0f)
                     {
+                        //gameObject.SetActive(false);
+                        isActive = false;
                         break;
                     }
 
@@ -264,14 +301,18 @@ public class enemy : MonoBehaviour
             switch(bullet_type)
             {
                 case BULLET_TYPE.NORMAL:
-                    Instantiate(bulletPrefab, barrel.transform.position, Quaternion.identity);
+                    //Instantiate(normalBulletPrefab, barrel.transform.position, Quaternion.identity,bulletCase.transform);
+                    CreateBullet(barrel.transform.position, Quaternion.identity);
                     cooltime = default_cooltime;
                     break;
 
                 case BULLET_TYPE.SPREAD:
-                    Instantiate(bulletPrefab, barrel.transform.position, Quaternion.identity);
-                    Instantiate(bulletPrefab, barrel.transform.position, angle1);
-                    Instantiate(bulletPrefab, barrel.transform.position, angle2);
+                    //Instantiate(spreadBulletPrefab, barrel.transform.position, Quaternion.identity, bulletCase.transform);
+                    //Instantiate(spreadBulletPrefab, barrel.transform.position, angle1, bulletCase.transform);
+                    //Instantiate(spreadBulletPrefab, barrel.transform.position, angle2, bulletCase.transform);
+                    CreateBullet(barrel.transform.position, Quaternion.identity);
+                    CreateBullet(barrel.transform.position, angle1);
+                    CreateBullet(barrel.transform.position, angle2);
                     cooltime = default_cooltime;
                     break;
 
@@ -286,11 +327,39 @@ public class enemy : MonoBehaviour
         elapsedTime = 0.0f;
         distance = Vector3.Distance(start_pos.position, end_pos.position);
     }
+
+    private void CreateBullet(Vector3 position, Quaternion angle)
+    {
+        switch(bullet_type)
+        {
+            case BULLET_TYPE.NORMAL:
+                var newNormalBullet = NormalBulletPool.GetObject(position);
+                newNormalBullet.transform.rotation = angle;
+                break;
+
+            case BULLET_TYPE.SPREAD:
+                var newSpreadBullet = SpreadBulletPool.GetObject(position);
+                newSpreadBullet.transform.rotation = angle;
+                break;
+
+            case BULLET_TYPE.HOMING:
+                break;
+        }
+    }
+
     void OnTriggerEnter2D(Collider2D other)
     {
         if (other.gameObject.CompareTag("bullet"))
         {
             Debug.Log("hit!!");
+            SoundManager.instance.PlaySE(SoundManager.SE_TYPE.SE_DAMAGE);
+            hp -= other.gameObject.GetComponent<Bullet>().damege;
+            if(hp <= 0)
+            {
+                //Destroy(gameObject);
+                isActive = false;
+            }
+
         }
     }
 }

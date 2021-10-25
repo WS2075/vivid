@@ -13,6 +13,7 @@ public class enemyPlayableAsset : PlayableAsset
     public int EndPosNum;
     public int FormationPosNum;
     public enemy.MOVE_TYPE move_type;
+    public enemy.BULLET_TYPE bullet_type;
 
     public override Playable CreatePlayable(PlayableGraph graph, GameObject go)
     {
@@ -20,6 +21,7 @@ public class enemyPlayableAsset : PlayableAsset
         behaviour.EndPosNum = EndPosNum;
         behaviour.FormationPosNum = FormationPosNum;
         behaviour.move_type = move_type;
+        behaviour.bullet_type = bullet_type;
 
         var playable = ScriptPlayable<enemyPlayableBehaviour>.Create(graph,behaviour);
         return playable;

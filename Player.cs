@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using static UnityEngine.InputSystem.InputAction;
+using QFSW.MOP2;
 
 public class Player : MonoBehaviour
 {
@@ -38,6 +39,16 @@ public class Player : MonoBehaviour
 
     private Bullet ScrBullet;
 
+    //[SerializeField]
+    //private Transform BulletCase;
+
+    //ObjectPool
+    [SerializeField]
+    private ObjectPool BulletPoolA;
+    [SerializeField]
+    private ObjectPool BulletPoolB;
+    [SerializeField]
+    private ObjectPool BulletPoolC;
 
     // Start is called before the first frame update
     void Start()
@@ -128,22 +139,24 @@ public class Player : MonoBehaviour
                                 //Debug.Log(ScrBulletA.GetPowState());
                                 if (cooltime <= 0.0f)
                                 {
+                                    SoundManager.instance.PlaySE(SoundManager.SE_TYPE.SE_SHOOT);
                                     for (int i = 0; i <= (int)ScrBullet.GetPowState() + 1; i++)//ScrBulletA.GetPowState() + 1
                                     {
-                                        Instantiate(bulletPrefab[(int)type], barrelforward.transform.position + new Vector3(0.0f, 25.0f - i * 50.0f, 0.0f), rotZ_180);
+                                        //Instantiate(bulletPrefab[(int)type], barrelforward.transform.position + new Vector3(0.0f, 25.0f - i * 50.0f, 0.0f), rotZ_180, BulletCase);
+                                        CreateBullet(barrelforward.transform.position + new Vector3(0.0f, 25.0f - i * 50.0f, 0.0f), rotZ_180);
                                     }
-                                    //Instantiate(bulletPrefab[(int)type], barrelforward.transform.position + new Vector3(0.0f, 25.0f, 0.0f), Quaternion.identity);
-                                    //Instantiate(bulletPrefab[(int)type], barrelforward.transform.position + new Vector3(0.0f, -25.0f, 0.0f), Quaternion.identity);
-                                    cooltime = ScrBullet.GetCooltime();//ScrBulletA.GetCooltime();
+                                    cooltime = ScrBullet.GetCooltime();
                                 }
                                 break;
 
                             case Bullet.POW_STATE.STATE_2:
                                 if (cooltime <= 0.0f)
                                 {
+                                    SoundManager.instance.PlaySE(SoundManager.SE_TYPE.SE_SHOOT);
                                     for (int i = 0; i <= (int)ScrBullet.GetPowState() + 1; i++)
                                     {
-                                        Instantiate(bulletPrefab[(int)type], barrelforward.transform.position + new Vector3(0.0f + ((i % 2) * 50.0f), 50.0f - i * 50.0f, 0.0f), rotZ_180);
+                                        //Instantiate(bulletPrefab[(int)type], barrelforward.transform.position + new Vector3(0.0f + ((i % 2) * 50.0f), 50.0f - i * 50.0f, 0.0f), rotZ_180, BulletCase);
+                                        CreateBullet(barrelforward.transform.position + new Vector3(0.0f + ((i % 2) * 50.0f), 50.0f - i * 50.0f, 0.0f), rotZ_180);
                                     }
                                     cooltime = ScrBullet.GetCooltime();
                                 }
@@ -152,10 +165,13 @@ public class Player : MonoBehaviour
                             case Bullet.POW_STATE.STATE_3:
                                 if (cooltime <= 0.0f)
                                 {
+                                    SoundManager.instance.PlaySE(SoundManager.SE_TYPE.SE_SHOOT);
                                     for (int i = 0; i < (int)ScrBullet.GetPowState(); i++)
                                     {
-                                        Instantiate(bulletPrefab[(int)type], barrelforward.transform.position + new Vector3(50.0f, 25.0f - (i * 50.0f), 0.0f), rotZ_180);
-                                        Instantiate(bulletPrefab[(int)type], barrelforward.transform.position + new Vector3(0.0f, 75.0f - (i * 150.0f), 0.0f), rotZ_180);
+                                        //Instantiate(bulletPrefab[(int)type], barrelforward.transform.position + new Vector3(50.0f, 25.0f - (i * 50.0f), 0.0f), rotZ_180, BulletCase);
+                                        //Instantiate(bulletPrefab[(int)type], barrelforward.transform.position + new Vector3(0.0f, 75.0f - (i * 150.0f), 0.0f), rotZ_180, BulletCase);
+                                        CreateBullet(barrelforward.transform.position + new Vector3(50.0f, 25.0f - (i * 50.0f), 0.0f), rotZ_180);
+                                        CreateBullet(barrelforward.transform.position + new Vector3(0.0f, 75.0f - (i * 150.0f), 0.0f), rotZ_180);
                                     }
                                     cooltime = ScrBullet.GetCooltime();
                                 }
@@ -169,8 +185,11 @@ public class Player : MonoBehaviour
                             case Bullet.POW_STATE.STATE_1:
                                 if (cooltime <= 0.0f)
                                 {
-                                    Instantiate(bulletPrefab[(int)type], barrelforward.transform.position, rotZ_180);
-                                    Instantiate(bulletPrefab[(int)type], barrelback.transform.position, Quaternion.identity);
+                                    SoundManager.instance.PlaySE(SoundManager.SE_TYPE.SE_SHOOT);
+                                    //Instantiate(bulletPrefab[(int)type], barrelforward.transform.position, rotZ_180, BulletCase);
+                                    //Instantiate(bulletPrefab[(int)type], barrelback.transform.position, Quaternion.identity, BulletCase);
+                                    CreateBullet(barrelforward.transform.position, rotZ_180);
+                                    CreateBullet(barrelback.transform.position, Quaternion.identity);
                                     cooltime = ScrBullet.GetCooltime();
                                 }
                                 break;
@@ -178,10 +197,13 @@ public class Player : MonoBehaviour
                             case Bullet.POW_STATE.STATE_2:
                                 if (cooltime <= 0.0f)
                                 {
-                                    Instantiate(bulletPrefab[(int)type], barrelforward.transform.position, rotZ_180);
+                                    SoundManager.instance.PlaySE(SoundManager.SE_TYPE.SE_SHOOT);
+                                    //Instantiate(bulletPrefab[(int)type], barrelforward.transform.position, rotZ_180, BulletCase);
+                                    CreateBullet(barrelforward.transform.position, rotZ_180);
                                     for (int i = 0; i < (int)ScrBullet.GetPowState() + 1; i++)
                                     {
-                                        Instantiate(bulletPrefab[(int)type], barrelback.transform.position + new Vector3(0.0f, 25.0f - i * 50.0f, 0.0f), Quaternion.identity);
+                                        //Instantiate(bulletPrefab[(int)type], barrelback.transform.position + new Vector3(0.0f, 25.0f - i * 50.0f, 0.0f), Quaternion.identity, BulletCase);
+                                        CreateBullet(barrelback.transform.position + new Vector3(0.0f, 25.0f - i * 50.0f, 0.0f), Quaternion.identity);
                                     }
                                     cooltime = ScrBullet.GetCooltime();
                                 }
@@ -190,10 +212,13 @@ public class Player : MonoBehaviour
                             case Bullet.POW_STATE.STATE_3:
                                 if (cooltime <= 0.0f)
                                 {
-                                    Instantiate(bulletPrefab[(int)type], barrelforward.transform.position, rotZ_180);
+                                    SoundManager.instance.PlaySE(SoundManager.SE_TYPE.SE_SHOOT);
+                                    //Instantiate(bulletPrefab[(int)type], barrelforward.transform.position, rotZ_180, BulletCase);
+                                    CreateBullet(barrelforward.transform.position, rotZ_180);
                                     for (int i = 0; i < (int)ScrBullet.GetPowState() + 1; i++)
                                     {
-                                        Instantiate(bulletPrefab[(int)type], barrelback.transform.position + new Vector3(0.0f - ((i % 2) * 50.0f), 50.0f - i * 50.0f, 0.0f), Quaternion.identity);
+                                        //Instantiate(bulletPrefab[(int)type], barrelback.transform.position + new Vector3(0.0f - ((i % 2) * 50.0f), 50.0f - i * 50.0f, 0.0f), Quaternion.identity, BulletCase);
+                                        CreateBullet(barrelback.transform.position + new Vector3(0.0f - ((i % 2) * 50.0f), 50.0f - i * 50.0f, 0.0f), Quaternion.identity);
                                     }
                                     cooltime = ScrBullet.GetCooltime();
                                 }
@@ -202,7 +227,7 @@ public class Player : MonoBehaviour
                         break;
 
                     case BULLET_TYPE.TYPE_C:
-                        Quaternion angle1, angle2, angle3;
+                        Quaternion angle1, angle2;
                         angle1 = Quaternion.AngleAxis(210.0f, new Vector3(0.0f, 0.0f, 1.0f));
                         angle2 = Quaternion.AngleAxis(150.0f, new Vector3(0.0f, 0.0f, 1.0f));
                         switch (ScrBullet.GetPowState())
@@ -210,8 +235,11 @@ public class Player : MonoBehaviour
                             case Bullet.POW_STATE.STATE_1:
                                 if (cooltime <= 0.0f)
                                 {
-                                    Instantiate(bulletPrefab[(int)type], barrelforward.transform.position + new Vector3(0.0f, 50.0f, 0.0f), angle1);
-                                    Instantiate(bulletPrefab[(int)type], barrelforward.transform.position + new Vector3(0.0f, -50.0f, 0.0f), angle2);
+                                    SoundManager.instance.PlaySE(SoundManager.SE_TYPE.SE_SHOOT);
+                                    //Instantiate(bulletPrefab[(int)type], barrelforward.transform.position + new Vector3(0.0f, 50.0f, 0.0f), angle1, BulletCase);
+                                    //Instantiate(bulletPrefab[(int)type], barrelforward.transform.position + new Vector3(0.0f, -50.0f, 0.0f), angle2, BulletCase);
+                                    CreateBullet(barrelforward.transform.position + new Vector3(0.0f, 50.0f, 0.0f), angle1);
+                                    CreateBullet(barrelforward.transform.position + new Vector3(0.0f, -50.0f, 0.0f), angle2);
                                     cooltime = ScrBullet.GetCooltime();
                                 }
                                 break;
@@ -219,10 +247,14 @@ public class Player : MonoBehaviour
                             case Bullet.POW_STATE.STATE_2:
                                 if (cooltime <= 0.0f)
                                 {
-                                    angle3 = Quaternion.AngleAxis(180.0f, new Vector3(0.0f, 0.0f, 1.0f));
-                                    Instantiate(bulletPrefab[(int)type], barrelforward.transform.position + new Vector3(0.0f, 50.0f, 0.0f), angle1);
-                                    Instantiate(bulletPrefab[(int)type], barrelforward.transform.position, angle3);
-                                    Instantiate(bulletPrefab[(int)type], barrelforward.transform.position + new Vector3(0.0f, -50.0f, 0.0f), angle2);
+                                    SoundManager.instance.PlaySE(SoundManager.SE_TYPE.SE_SHOOT);
+                                    //angle3 = Quaternion.AngleAxis(180.0f, new Vector3(0.0f, 0.0f, 1.0f));
+                                    //Instantiate(bulletPrefab[(int)type], barrelforward.transform.position + new Vector3(0.0f, 50.0f, 0.0f), angle1, BulletCase);
+                                    //Instantiate(bulletPrefab[(int)type], barrelforward.transform.position, angle3, BulletCase);
+                                    //Instantiate(bulletPrefab[(int)type], barrelforward.transform.position + new Vector3(0.0f, -50.0f, 0.0f), angle2, BulletCase);
+                                    CreateBullet(barrelforward.transform.position + new Vector3(0.0f, 50.0f, 0.0f), angle1);
+                                    CreateBullet(barrelforward.transform.position, rotZ_180);
+                                    CreateBullet(barrelforward.transform.position + new Vector3(0.0f, -50.0f, 0.0f), angle2);
                                     cooltime = ScrBullet.GetCooltime();
                                 }
                                 break;
@@ -230,10 +262,14 @@ public class Player : MonoBehaviour
                             case Bullet.POW_STATE.STATE_3:
                                 if (cooltime <= 0.0f)
                                 {
-                                    angle3 = Quaternion.AngleAxis(180.0f, new Vector3(0.0f, 0.0f, 1.0f));
-                                    Instantiate(bulletPrefab[(int)type], barrelforward.transform.position + new Vector3(0.0f, 50.0f, 0.0f), angle1);
-                                    Instantiate(bulletPrefab[(int)type], barrelforward.transform.position, angle3);
-                                    Instantiate(bulletPrefab[(int)type], barrelforward.transform.position + new Vector3(0.0f, -50.0f, 0.0f), angle2);
+                                    SoundManager.instance.PlaySE(SoundManager.SE_TYPE.SE_SHOOT);
+                                    //angle3 = Quaternion.AngleAxis(180.0f, new Vector3(0.0f, 0.0f, 1.0f));
+                                    //Instantiate(bulletPrefab[(int)type], barrelforward.transform.position + new Vector3(0.0f, 50.0f, 0.0f), angle1, BulletCase);
+                                    //Instantiate(bulletPrefab[(int)type], barrelforward.transform.position, angle3, BulletCase);
+                                    //Instantiate(bulletPrefab[(int)type], barrelforward.transform.position + new Vector3(0.0f, -50.0f, 0.0f), angle2, BulletCase);
+                                    CreateBullet(barrelforward.transform.position + new Vector3(0.0f, 50.0f, 0.0f), angle1);
+                                    CreateBullet(barrelforward.transform.position, rotZ_180);
+                                    CreateBullet(barrelforward.transform.position + new Vector3(0.0f, -50.0f, 0.0f), angle2);
                                     cooltime = ScrBullet.GetCooltime();
                                 }
 
@@ -245,6 +281,8 @@ public class Player : MonoBehaviour
 
             }
         }
+
+        
     }
 
     public int GetNowHP()
@@ -257,8 +295,34 @@ public class Player : MonoBehaviour
         return remaining;
     }
 
+    public void ReSpawn()
+    {
+        now_hp = max_hp;
+        remaining = remaining - 1;
+    }
+
+    private void CreateBullet(Vector3 position, Quaternion angle)
+    {
+        switch(type)
+        {
+            case BULLET_TYPE.TYPE_A:
+                var newBulletA = BulletPoolA.GetObject(position);
+                newBulletA.transform.rotation = angle;
+                break;
+            case BULLET_TYPE.TYPE_B:
+                var newBulletB = BulletPoolB.GetObject(position);
+                newBulletB.transform.rotation = angle;
+                break;
+            case BULLET_TYPE.TYPE_C:
+                var newBulletC = BulletPoolC.GetObject(position);
+                newBulletC.transform.rotation = angle;
+                break;
+        }
+    }
+
     void OnTriggerEnter2D(Collider2D other)
     {
+        //item
         if(other.gameObject.CompareTag("item"))
         {
             Destroy(other.gameObject);
@@ -277,6 +341,19 @@ public class Player : MonoBehaviour
                 case BULLET_TYPE.TYPE_C:
                     ScrBullet.LevelUp();
                     break;
+            }
+        }
+
+        //enemy_bullet
+        if(other.gameObject.CompareTag("enemy_bullet"))
+        {
+            SoundManager.instance.PlaySE(SoundManager.SE_TYPE.SE_DAMAGE);
+            Destroy(other.gameObject);
+            now_hp -= other.gameObject.GetComponent<enemy_bullet>().damage;
+
+            if (now_hp <= 0)
+            {
+                gameObject.SetActive(false);
             }
         }
     }
