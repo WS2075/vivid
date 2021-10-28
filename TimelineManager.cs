@@ -30,6 +30,21 @@ public class TimelineManager : MonoBehaviour
                     }
                 }
             }
+
+            if (childTransform.tag == "boss")
+            {
+                foreach (var binding in director.playableAsset.outputs)
+                {
+                    if (binding.streamName == "Loop Track")
+                    {
+                        if (director.GetGenericBinding(binding.sourceObject) == null)
+                        {
+                            director.SetGenericBinding(binding.sourceObject, childTransform.gameObject);
+                            break;
+                        }
+                    }
+                }
+            }
         }
     }
 

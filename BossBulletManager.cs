@@ -4,6 +4,10 @@ using UnityEngine;
 
 public class BossBulletManager : MonoBehaviour
 {
+    private GameObject Mgr;
+    private Manager scrManager;
+
+    [Header("Barrel")]
     [SerializeField]
     private GameObject BarrelObj;
 
@@ -13,6 +17,10 @@ public class BossBulletManager : MonoBehaviour
     private float Radius;
     [SerializeField]
     private float CoolTime;
+    [SerializeField]
+    private bool isTurn;
+    [SerializeField]
+    private bool isChild;
 
     private BossBarrel scrBossBarrel;
     private float repeat = 1.0f;
@@ -29,6 +37,9 @@ public class BossBulletManager : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        Mgr = GameObject.Find("GameManager");
+        scrManager = Mgr.GetComponent<Manager>();
+
         scrBossBarrel = BarrelObj.GetComponent<BossBarrel>();
         scrBossBarrel.CoolTime = CoolTime;
 
@@ -52,39 +63,56 @@ public class BossBulletManager : MonoBehaviour
             Instantiate(BarrelObj, gameObject.transform.position + position, angle, transform);
         }
 
-        distance = Vector3.Distance(MovePosition[startpos].localPosition, MovePosition[startpos + 1].localPosition);
+        if(!isChild)
+        {
+            distance = Vector3.Distance(MovePosition[startpos].localPosition, MovePosition[startpos + 1].localPosition);
+        }
+        
     }
 
     // Update is called once per frame
     void Update()
     {
-        transform.Rotate(0.0f, 0.0f, 30.0f * Time.deltaTime);
+        if(!scrManager.isPause)
+        {
+            if(isTurn)
+            {
+                transform.Rotate(0.0f, 0.0f, 30.0f * Time.deltaTime);
+            }
 
-        elapsedTime += Time.deltaTime;
-        float now_Location = (elapsedTime * move_speed) / distance;
-        if(now_Location <= 1.0f)
-        {
-            if(startpos < MovePosition.Length - 1)
+            if(!isChild)
             {
-                transform.localPosition = Vector3.Lerp(MovePosition[startpos].localPosition, MovePosition[startpos + 1].localPosition, now_Location);
+                elapsedTime += Time.deltaTime;
+                float now_Location = (elapsedTime * move_speed) / distance;
+                if (now_Location <= 1.0f)
+                {
+                    if (startpos < MovePosition.Length - 1)
+                    {
+                        transform.localPosition = Vector3.Lerp(MovePosition[startpos].localPosition, MovePosition[startpos + 1].localPosition, now_Location);
+                    }
+                    else
+                    {
+                        transform.localPosition = Vector3.Lerp(MovePosition[startpos].localPosition, MovePosition[0].localPosition, now_Location);
+                    }
+                }
+                else
+                {
+                    if (startpos < MovePosition.Length - 1)
+                    {
+                        SetStartEnd(startpos + 1);
+                    }
+                    else
+                    {
+                        SetStartEnd(0);
+                    }
+                }
             }
             else
             {
-                transform.localPosition = Vector3.Lerp(MovePosition[startpos].localPosition, MovePosition[0].localPosition, now_Location);
+                transform.Rotate(0.0f, 0.0f, -30.0f * Time.deltaTime);
             }
+            
         }
-        else
-        {
-            if(startpos < MovePosition.Length - 1)
-            {
-                SetStartEnd(startpos + 1);
-            }
-            else
-            {
-                SetStartEnd(0);  
-            }
-        }
-       
     }
 
     private void SetStartEnd(int startNum)

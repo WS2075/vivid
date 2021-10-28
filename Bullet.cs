@@ -74,7 +74,10 @@ public class Bullet : MonoBehaviour
     {
         if(gameObject.activeInHierarchy)
         {
-            BulletPool.Release(gameObject);
+            if(other.gameObject.CompareTag("enemy"))
+            {
+                BulletPool.Release(gameObject);
+            }
         }      
     }
 }

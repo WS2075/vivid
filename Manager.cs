@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.InputSystem;
+using UnityEngine.Playables;
 
 public class Manager : MonoBehaviour
 {
@@ -17,18 +18,36 @@ public class Manager : MonoBehaviour
     [SerializeField]
     private GameObject pause;
 
-    private bool isPause;
+    [SerializeField]
+    private PlayableDirector playable;
+
+    [SerializeField]
+    private GameObject GameClear;
+    private Animator ClearAnime;
+
+    [SerializeField]
+    private GameObject GameOver;
+    private Animator OverAnime;
+
+    public bool isPause;
     private bool isSpaen;
+    private bool isClear;
+    private bool isOver;
     TimeMgr timeMgr;
     // Start is called before the first frame update
     void Start()
     {
         isPause = false;
         isSpaen = false;
+        isClear = false;
+        isOver = false;
         timeMgr = GetComponent<TimeMgr>();
         SoundManager.instance.PlayBGM(SoundManager.BGM_TYPE.BGM_GAME);
 
         scrPlayer = player.GetComponent<Player>();
+
+        ClearAnime = GameClear.GetComponent<Animator>();
+        OverAnime = GameOver.GetComponent<Animator>();
     }
 
     // Update is called once per frame
@@ -42,6 +61,8 @@ public class Manager : MonoBehaviour
         if (Keyboard.current.enterKey.wasPressedThisFrame)
         {
             Instantiate(item, new Vector3(800.0f, 0.0f, 0.0f), Quaternion.identity);
+
+            isClear = true;
         }
 
         if (Keyboard.current.digit0Key.isPressed)
@@ -55,6 +76,18 @@ public class Manager : MonoBehaviour
             StartCoroutine(ReSpawn());
         }
 
+        if(isClear)
+        {
+            GameClear.SetActive(true);
+            ClearAnime.SetBool("isClear", true);
+        }
+
+        if(isOver)
+        {
+            GameOver.SetActive(true);
+            OverAnime.SetBool("isOver", true);
+        }
+
     }
 
     public void isPaused()
@@ -65,11 +98,13 @@ public class Manager : MonoBehaviour
         if(isPause)
         {
             timeMgr.SetGameSpeed(0.0f);
+            playable.Pause();
             Debug.Log(timeMgr.GetGameSpeed());
         }
         else
         {
             timeMgr.SetGameSpeed(1.0f);
+            playable.Resume();
             Debug.Log(timeMgr.GetGameSpeed());
         }
     }
@@ -88,6 +123,10 @@ public class Manager : MonoBehaviour
             scrPlayer.ReSpawn();
             isSpaen = false;
             Debug.Log("ReSpawn");
+        }
+        else
+        {
+            isOver = true;
         }
     }
 }

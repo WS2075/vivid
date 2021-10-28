@@ -22,7 +22,9 @@ public class Player : MonoBehaviour
     private Vector3 move;
     private float powValue;
     private float cooltime;
+    private bool bulletC_active = false;
     private bool isFire = false;
+    private bool isBlink = false;
     Quaternion rotZ_180;
     private Rigidbody2D rd;
 
@@ -50,9 +52,13 @@ public class Player : MonoBehaviour
     [SerializeField]
     private ObjectPool BulletPoolC;
 
+    private Animator anime;
+
     // Start is called before the first frame update
     void Start()
     {
+        anime = GetComponent<Animator>();
+
         timeMgr = Mgr.GetComponent<TimeMgr>();
 
         ScrBullet = bulletPrefab[(int)BULLET_TYPE.TYPE_A].GetComponent<Bullet>();
@@ -78,6 +84,21 @@ public class Player : MonoBehaviour
     public void OnMove(InputAction.CallbackContext context)
     {
         move = context.ReadValue<Vector2>();
+
+        if(move.y > 0.0f)
+        {
+            anime.SetBool("Up", true);
+            Debug.Log(move.y);
+        }
+        else if(move.y < 0.0f)
+        {
+            anime.SetBool("Down", true);
+        }
+        else
+        {
+            anime.SetBool("Up", false);
+            anime.SetBool("Down", false);
+        }
     }
 
     public void OnFire(InputAction.CallbackContext context)
@@ -107,6 +128,14 @@ public class Player : MonoBehaviour
         cooltime -= Time.deltaTime;
 
         transform.Translate(move * speed * Time.deltaTime * timeMgr.GetGameSpeed());
+
+        if(!bulletC_active)
+        {
+            if(type == BULLET_TYPE.TYPE_C)
+            {
+                type++;
+            }
+        }
 
         if (type == BULLET_TYPE.TYPE_MAX)
         {
@@ -297,8 +326,17 @@ public class Player : MonoBehaviour
 
     public void ReSpawn()
     {
+        anime.SetBool("Respawn", true);
         now_hp = max_hp;
         remaining = remaining - 1;
+
+        Invoke("SetBlink", 2);
+    }
+
+    private void SetBlink()
+    {
+        isBlink = false;
+        anime.SetBool("Respawn", false);
     }
 
     private void CreateBullet(Vector3 position, Quaternion angle)
@@ -344,16 +382,20 @@ public class Player : MonoBehaviour
             }
         }
 
-        //enemy_bullet
-        if(other.gameObject.CompareTag("enemy_bullet"))
+        if(!isBlink)
         {
-            SoundManager.instance.PlaySE(SoundManager.SE_TYPE.SE_DAMAGE);
-            Destroy(other.gameObject);
-            now_hp -= other.gameObject.GetComponent<enemy_bullet>().damage;
-
-            if (now_hp <= 0)
+            //enemy_bullet
+            if (other.gameObject.CompareTag("enemy_bullet"))
             {
-                gameObject.SetActive(false);
+                SoundManager.instance.PlaySE(SoundManager.SE_TYPE.SE_DAMAGE);
+                Destroy(other.gameObject);
+                now_hp -= other.gameObject.GetComponent<enemy_bullet>().damage;
+
+                if (now_hp <= 0)
+                {
+                    isBlink = true;
+                    gameObject.SetActive(false);
+                }
             }
         }
     }

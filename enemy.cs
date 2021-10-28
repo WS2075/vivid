@@ -37,6 +37,7 @@ public class enemy : MonoBehaviour, ITimeControl
     public float battletime;
     public bool isMiddle;
     public MOVE_TYPE move_type;
+    public int score;
     private bool isActive;
     
     [Header("Bullet")]
@@ -55,6 +56,10 @@ public class enemy : MonoBehaviour, ITimeControl
     private ObjectPool SpreadBulletPool;
     [SerializeField]
     private ObjectPool HomingBulletPool;
+
+    [Header("Particle")]
+    [SerializeField]
+    private ObjectPool particlePool;
 
     [Header("No Touch")]
     public int startPosNum;
@@ -76,6 +81,7 @@ public class enemy : MonoBehaviour, ITimeControl
     private bool withdraw_phase2 = false;
 
     private GameObject mgr;
+    private ScoreManager scrScoreMgr;
 
     private GameObject bulletCase;
 
@@ -113,6 +119,7 @@ public class enemy : MonoBehaviour, ITimeControl
         //scrEnemybullet = bulletPrefab.GetComponent<enemy_bullet>();
 
         mgr = GameObject.Find("GameManager");
+        scrScoreMgr = mgr.GetComponent<ScoreManager>();
 
         startMarker = mgr.transform.GetChild(startPosNum);
         endMarker = mgr.transform.GetChild(endPosNum);
@@ -347,6 +354,11 @@ public class enemy : MonoBehaviour, ITimeControl
         }
     }
 
+    private void CreateParticle(Vector3 position)
+    {
+        var newParticle = particlePool.GetObject(position);
+    }
+
     void OnTriggerEnter2D(Collider2D other)
     {
         if (other.gameObject.CompareTag("bullet"))
@@ -354,9 +366,13 @@ public class enemy : MonoBehaviour, ITimeControl
             Debug.Log("hit!!");
             SoundManager.instance.PlaySE(SoundManager.SE_TYPE.SE_DAMAGE);
             hp -= other.gameObject.GetComponent<Bullet>().damege;
+            
             if(hp <= 0)
             {
                 //Destroy(gameObject);
+                //particle.Play();
+                scrScoreMgr.addScore(score);
+                CreateParticle(gameObject.transform.position);
                 isActive = false;
             }
 

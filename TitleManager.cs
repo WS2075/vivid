@@ -18,6 +18,10 @@ public class TitleManager : MonoBehaviour
 
     public MODE_STATE state;
 
+    [SerializeField]
+    private GameObject fadeManager;
+    private FadeManager scrFadeMgr;
+
     //private SEManager scrSEMgr;
 
     // Start is called before the first frame update
@@ -25,6 +29,8 @@ public class TitleManager : MonoBehaviour
     {
         state = MODE_STATE.MODE_START;
         SoundManager.instance.PlayBGM(SoundManager.BGM_TYPE.BGM_TITLE);
+
+        scrFadeMgr = fadeManager.GetComponent<FadeManager>();
         //scrSEMgr = GetComponent<SEManager>();
     }
 
@@ -54,7 +60,8 @@ public class TitleManager : MonoBehaviour
                 if (Keyboard.current.enterKey.isPressed)
                 {
                     SoundManager.instance.PlaySE(SoundManager.SE_TYPE.SE_OK);
-                    SceneManager.LoadScene("Game", LoadSceneMode.Single);
+                    //SceneManager.LoadScene("Game", LoadSceneMode.Single);
+                    scrFadeMgr.FadeOutStart(0, 0, 0, 0, "Game");
                     //scrSEMgr.SE1();
                     //if (scrSEMgr.SECheck())
                     //{
