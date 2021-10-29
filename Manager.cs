@@ -11,9 +11,8 @@ public class Manager : MonoBehaviour
     private GameObject player;
     private Player scrPlayer;
 
-    //仮
-    [SerializeField]
-    private GameObject item;
+    private GameObject fadeManager;
+    private FadeManager scrFadeMgr;
 
     [SerializeField]
     private GameObject pause;
@@ -31,7 +30,7 @@ public class Manager : MonoBehaviour
 
     public bool isPause;
     private bool isSpaen;
-    private bool isClear;
+    public bool isClear;
     private bool isOver;
     TimeMgr timeMgr;
     // Start is called before the first frame update
@@ -48,6 +47,9 @@ public class Manager : MonoBehaviour
 
         ClearAnime = GameClear.GetComponent<Animator>();
         OverAnime = GameOver.GetComponent<Animator>();
+
+        fadeManager = GameObject.Find("FadeManager");
+        scrFadeMgr = fadeManager.GetComponent<FadeManager>();
     }
 
     // Update is called once per frame
@@ -58,16 +60,15 @@ public class Manager : MonoBehaviour
             isPaused();
         }
 
-        if (Keyboard.current.enterKey.wasPressedThisFrame)
-        {
-            Instantiate(item, new Vector3(800.0f, 0.0f, 0.0f), Quaternion.identity);
-
-            isClear = true;
-        }
+        //if (Keyboard.current.enterKey.wasPressedThisFrame)
+        //{
+        //    isClear = true;
+        //}
 
         if (Keyboard.current.digit0Key.isPressed)
         {
-            SceneManager.LoadScene("Title", LoadSceneMode.Single);
+            //SceneManager.LoadScene("Title", LoadSceneMode.Single);
+            scrFadeMgr.FadeOutStart(0, 0, 0, 0, "Title");
         }
 
         if (!player.activeSelf && isSpaen == false)
@@ -78,14 +79,34 @@ public class Manager : MonoBehaviour
 
         if(isClear)
         {
+            SoundManager.instance.PlayBGM(SoundManager.BGM_TYPE.BGM_CLEAR);
             GameClear.SetActive(true);
             ClearAnime.SetBool("isClear", true);
+
+            if(ClearAnime.GetCurrentAnimatorStateInfo(0).normalizedTime >= 1)
+            {
+                if(Keyboard.current.enterKey.wasPressedThisFrame)
+                {
+                    //SceneManager.LoadScene("Title", LoadSceneMode.Single);
+                    scrFadeMgr.FadeOutStart(0, 0, 0, 0, "Title");
+                }
+            }
         }
 
         if(isOver)
         {
+            SoundManager.instance.PlayBGM(SoundManager.BGM_TYPE.BGM_OVER);
             GameOver.SetActive(true);
             OverAnime.SetBool("isOver", true);
+
+            if(OverAnime.GetCurrentAnimatorStateInfo(0).normalizedTime >= 1)
+            {
+                if (Keyboard.current.enterKey.wasPressedThisFrame)
+                {
+                    //SceneManager.LoadScene("Title", LoadSceneMode.Single);
+                    scrFadeMgr.FadeOutStart(0, 0, 0, 0, "Title");
+                }
+            }
         }
 
     }

@@ -31,6 +31,13 @@ public class enemy : MonoBehaviour, ITimeControl
         HOMING
     }
 
+    public enum ITEM
+    {
+        RECOVER,
+        POWERUP,
+        ONEUP
+    }
+
     [Header("Status")]
     public int hp;
     public float speed;
@@ -39,7 +46,18 @@ public class enemy : MonoBehaviour, ITimeControl
     public MOVE_TYPE move_type;
     public int score;
     private bool isActive;
-    
+
+    [Header("Item")]
+    public bool isItem;
+    public ITEM item_state;
+    [SerializeField]
+    private GameObject recoverItem;
+    [SerializeField]
+    private GameObject powUpItem;
+    [SerializeField]
+    private GameObject oneUpItem;
+
+
     [Header("Bullet")]
     public BULLET_TYPE bullet_type;
     public GameObject barrel;
@@ -371,6 +389,23 @@ public class enemy : MonoBehaviour, ITimeControl
             {
                 //Destroy(gameObject);
                 //particle.Play();
+                if(isItem)
+                {
+                    switch(item_state)
+                    {
+                        case ITEM.RECOVER:
+                            Instantiate(recoverItem, gameObject.transform.position, Quaternion.identity);
+                            break;
+
+                        case ITEM.POWERUP:
+                            Instantiate(powUpItem, gameObject.transform.position, Quaternion.identity);
+                            break;
+
+                        case ITEM.ONEUP:
+                            Instantiate(oneUpItem, gameObject.transform.position, Quaternion.identity);
+                            break;
+                    }
+                }
                 scrScoreMgr.addScore(score);
                 CreateParticle(gameObject.transform.position);
                 isActive = false;

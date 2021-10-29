@@ -12,16 +12,20 @@ public class enemyPlayableAsset : PlayableAsset
     public int StartPosNum;
     public int EndPosNum;
     public int FormationPosNum;
+    public bool isItem;
     public enemy.MOVE_TYPE move_type;
     public enemy.BULLET_TYPE bullet_type;
+    public enemy.ITEM item_type;
 
     public override Playable CreatePlayable(PlayableGraph graph, GameObject go)
     {
         behaviour.StartPosNum = StartPosNum;
         behaviour.EndPosNum = EndPosNum;
         behaviour.FormationPosNum = FormationPosNum;
+        behaviour.isItem = isItem;
         behaviour.move_type = move_type;
         behaviour.bullet_type = bullet_type;
+        behaviour.item_type = item_type;
 
         var playable = ScriptPlayable<enemyPlayableBehaviour>.Create(graph,behaviour);
         return playable;

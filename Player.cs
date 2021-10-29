@@ -22,7 +22,7 @@ public class Player : MonoBehaviour
     private Vector3 move;
     private float powValue;
     private float cooltime;
-    private bool bulletC_active = false;
+    private bool bulletC_active = true;
     private bool isFire = false;
     private bool isBlink = false;
     Quaternion rotZ_180;
@@ -38,6 +38,7 @@ public class Player : MonoBehaviour
     [SerializeField]
     private GameObject Mgr;
     private TimeMgr timeMgr;
+    private ScoreManager scrScoreMgr;
 
     private Bullet ScrBullet;
 
@@ -60,6 +61,7 @@ public class Player : MonoBehaviour
         anime = GetComponent<Animator>();
 
         timeMgr = Mgr.GetComponent<TimeMgr>();
+        scrScoreMgr = Mgr.GetComponent<ScoreManager>();
 
         ScrBullet = bulletPrefab[(int)BULLET_TYPE.TYPE_A].GetComponent<Bullet>();
 
@@ -361,7 +363,7 @@ public class Player : MonoBehaviour
     void OnTriggerEnter2D(Collider2D other)
     {
         //item
-        if(other.gameObject.CompareTag("item"))
+        if(other.gameObject.CompareTag("powerup_item"))
         {
             Destroy(other.gameObject);
             Debug.Log("Item Get!!");
@@ -381,9 +383,46 @@ public class Player : MonoBehaviour
                     break;
             }
         }
-
-        if(!isBlink)
+        if (other.gameObject.CompareTag("oneup_item"))
         {
+            Destroy(other.gameObject);
+            remaining += 1;
+        }
+        if(other.gameObject.CompareTag("recover_item"))
+        {
+            Destroy(other.gameObject);
+
+            if(now_hp < max_hp)
+            {
+                now_hp += 30;
+                if(now_hp >= max_hp)
+                {
+                    now_hp = max_hp;
+                }
+            }
+            else
+            {
+                scrScoreMgr.addScore(1000);
+            }
+            
+            
+            
+        }
+
+        if (!isBlink)
+        {
+            if(other.gameObject.CompareTag("enemy"))
+            {
+                SoundManager.instance.PlaySE(SoundManager.SE_TYPE.SE_DAMAGE);
+                now_hp -= 10;
+
+                if (now_hp <= 0)
+                {
+                    isBlink = true;
+                    gameObject.SetActive(false);
+                }
+            }
+
             //enemy_bullet
             if (other.gameObject.CompareTag("enemy_bullet"))
             {

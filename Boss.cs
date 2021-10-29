@@ -59,6 +59,7 @@ public class Boss : MonoBehaviour
     {
         gameObject.SetActive(true);
         isActive = true;
+        
     }
 
     public void OnControlTimeStop()
@@ -78,6 +79,8 @@ public class Boss : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        SoundManager.instance.PlayBGM(SoundManager.BGM_TYPE.BGM_BOSS);
+
         Mgr = GameObject.Find("GameManager");
         scrManager = Mgr.GetComponent<Manager>();
 
@@ -110,6 +113,7 @@ public class Boss : MonoBehaviour
 
             if (!isActive)
             {
+                scrManager.isClear = true;
                 root.SetActive(false);
                 //gameObject.SetActive(false);
             }
